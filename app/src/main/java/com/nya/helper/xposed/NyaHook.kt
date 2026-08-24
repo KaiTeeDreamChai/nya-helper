@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
@@ -18,16 +17,13 @@ import com.nya.helper.engine.RuleEngine
 import com.nya.helper.model.NyaConfig
 import de.robv.android.xposed.IXposedHookLoadPackage
 import de.robv.android.xposed.XC_MethodHook
-import de.robv.android.xposed.XposedBridge
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
-import java.io.File
 import java.lang.ref.WeakReference
 
 class NyaHook : IXposedHookLoadPackage {
 
     companion object {
-        private const val TAG = "NyaHelperHook"
         private const val WATCHER_ATTACHED_KEY = 0x7f099999
         private var isModifying = false
         private var lastTransformedText = ""
@@ -52,27 +48,11 @@ class NyaHook : IXposedHookLoadPackage {
             return
         }
 
-        writeHeartbeat()
         hookChatApp(lpparam)
     }
 
-    private fun writeHeartbeat() {
-        try {
-            val f = File("/sdcard/Android/data/com.nya.helper/files/lsposed_heartbeat")
-            f.parentFile?.mkdirs()
-            f.writeText(System.currentTimeMillis().toString())
-            f.setReadable(true, false)
-        } catch (e: Exception) {}
-        try {
-            val f = File("/storage/emulated/0/Android/data/com.nya.helper/files/lsposed_heartbeat")
-            f.parentFile?.mkdirs()
-            f.writeText(System.currentTimeMillis().toString())
-            f.setReadable(true, false)
-        } catch (e: Exception) {}
-    }
-
     /**
-     * 标记 LSPosed 模块已激活
+     * 标记 LSPosed 模块已激活（纯内存级 Hook，不落盘任何标记文件）
      */
     private fun hookSelfActive(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
@@ -86,13 +66,11 @@ class NyaHook : IXposedHookLoadPackage {
                     }
                 }
             )
-        } catch (t: Throwable) {
-            XposedBridge.log("$TAG hookSelf error: $t")
-        }
+        } catch (_: Throwable) {}
     }
 
     /**
-     * 挂载聊天应用 Hook（极速无损、防卡死设计）
+     * 挂载聊天应用 Hook（极速无损、防卡死、防风控检测设计）
      */
     private fun hookChatApp(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
@@ -162,9 +140,7 @@ class NyaHook : IXposedHookLoadPackage {
                 }
             )
 
-        } catch (t: Throwable) {
-            XposedBridge.log("$TAG hookChatApp error: $t")
-        }
+        } catch (_: Throwable) {}
     }
 
     /**
@@ -190,16 +166,13 @@ class NyaHook : IXposedHookLoadPackage {
                 appContext.registerReceiver(receiver, filter)
             }
             isReceiverRegistered = true
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to register config broadcast receiver", e)
-        }
+        } catch (_: Exception) {}
     }
 
     /**
      * 快速、无异常抛出的发送按钮检测
      */
     private fun isLikelySendButton(view: View): Boolean {
-        // 1. 检查文本
         if (view is TextView) {
             val text = view.text?.toString()?.trim() ?: ""
             if (text == "发送" || text.equals("Send", ignoreCase = true) || text == "发 送") {
@@ -207,7 +180,6 @@ class NyaHook : IXposedHookLoadPackage {
             }
         }
 
-        // 2. 检查视图描述
         val desc = view.contentDescription?.toString()?.trim() ?: ""
         if (desc.contains("发送") || desc.contains("Send", ignoreCase = true)) {
             return true
@@ -256,7 +228,7 @@ class NyaHook : IXposedHookLoadPackage {
                 // 标点触发模式判断
                 if (config.triggerMode == NyaConfig.MODE_PUNCTUATION) {
                     val lastChar = currentText.lastOrNull()
-                    val isPunctuation = lastChar in listOf('。', '！', '？', '!', '?', '~', '\n')
+                    val isPunctuation = lastChar in listOf('。', '！', '？', '!', '?', '~', '～', '\n')
                     if (!isPunctuation) return
                 }
 
@@ -266,7 +238,7 @@ class NyaHook : IXposedHookLoadPackage {
     }
 
     /**
-     * 执行文本转换（0ms 延迟、防卡死、防循环注入）
+     * 执行文本转换（0ms 延迟、防卡死、防循环注入、纯内存级安全修改）
      */
     private fun transformEditText(editText: EditText, isSendEvent: Boolean) {
         if (isModifying) return
@@ -288,8 +260,7 @@ class NyaHook : IXposedHookLoadPackage {
             try {
                 editText.setText(transformed)
                 editText.setSelection(transformed.length)
-            } catch (e: Throwable) {
-                // ignore
+            } catch (_: Throwable) {
             } finally {
                 isModifying = false
             }

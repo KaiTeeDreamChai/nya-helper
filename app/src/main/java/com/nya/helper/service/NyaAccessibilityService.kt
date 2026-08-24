@@ -15,6 +15,7 @@ import com.nya.helper.engine.ConfigManager
 import com.nya.helper.engine.RuleEngine
 import com.nya.helper.model.NyaConfig
 import com.nya.helper.util.DebugLogger
+import kotlin.random.Random
 
 class NyaAccessibilityService : AccessibilityService() {
 
@@ -59,6 +60,7 @@ class NyaAccessibilityService : AccessibilityService() {
         if (isModifying) return
 
         if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+            // 纯退格删除检测
             if (event.removedCount > 0 && event.addedCount == 0) {
                 return
             }
@@ -79,9 +81,8 @@ class NyaAccessibilityService : AccessibilityService() {
 
             val nodeClass = sourceNode?.className?.toString() ?: "unknown"
             val nodeEditable = sourceNode?.isEditable ?: false
-            DebugLogger.log("TEXT_CHANGED: text='$currentText', class=$nodeClass, editable=$nodeEditable, pkg=$pkg")
 
-            // 防循环去重
+            // 防循环与高频防抖（800ms 内相同内容直接跳过，避免高频触发反作弊）
             val now = System.currentTimeMillis()
             if (currentText == lastTransformedText && now - lastTransformTime < 800) {
                 return
@@ -103,15 +104,17 @@ class NyaAccessibilityService : AccessibilityService() {
 
             val transformed = RuleEngine.transform(currentText, config)
             if (transformed != currentText && sourceNode != null) {
-                DebugLogger.log("触发转换: '$currentText' → '$transformed'")
                 isModifying = true
                 lastTransformedText = transformed
                 lastTransformTime = now
 
-                val success = injectText(sourceNode, currentText, transformed, nodeEditable, pkg)
-                DebugLogger.log("最终注入结果: $success")
-
-                mainHandler.postDelayed({ isModifying = false }, 300)
+                // 拟人化微抖动延迟 (15~30ms)，避免 0ms 机械注入触发客户端异常行为风控
+                val jitterDelay = Random.nextLong(15, 30)
+                mainHandler.postDelayed({
+                    val success = injectText(sourceNode, currentText, transformed, nodeEditable, pkg)
+                    DebugLogger.log("最终注入结果: $success (jitter=${jitterDelay}ms)")
+                    mainHandler.postDelayed({ isModifying = false }, 250)
+                }, jitterDelay)
             }
             return
         }
@@ -134,7 +137,6 @@ class NyaAccessibilityService : AccessibilityService() {
                 newText
             )
             val result = node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
-            DebugLogger.log("[策略A-SET_TEXT] result=$result")
             if (result) {
                 node.refresh()
                 val actual = node.text?.toString() ?: ""
@@ -142,7 +144,6 @@ class NyaAccessibilityService : AccessibilityService() {
                     DebugLogger.log("[策略A] ✅ 验证通过")
                     return true
                 }
-                DebugLogger.log("[策略A] 验证失败: actual='$actual'")
             }
         }
 
@@ -153,86 +154,43 @@ class NyaAccessibilityService : AccessibilityService() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val success = injectViaInputConnection(originalText, newText)
             if (success) return true
-        } else {
-            DebugLogger.log("[策略B] API ${Build.VERSION.SDK_INT} < 33，跳过")
         }
 
         // ============================================================
         // 策略 C: 剪贴板降级
         // ============================================================
         val clipResult = tryClipboardPaste(node, originalText, newText)
-        DebugLogger.log("[策略C-剪贴板] result=$clipResult")
-
-        return false
+        return clipResult
     }
 
     /**
      * 通过 InputConnection 直接操作文本（和键盘完全相同的通道）
-     * AccessibilityInputConnection 的方法全部返回 void，不返回 boolean
      */
     @Suppress("NewApi")
     private fun injectViaInputConnection(originalText: String, newText: String): Boolean {
         try {
-            val im = nyaInputMethod
-            if (im == null) {
-                DebugLogger.log("[策略B-IC] InputMethod 为 null")
-                return false
-            }
+            val im = nyaInputMethod ?: return false
+            val ic = im.currentInputConnection ?: return false
 
-            val ic = im.currentInputConnection
-            if (ic == null) {
-                DebugLogger.log("[策略B-IC] currentInputConnection 为 null")
-                return false
-            }
-
-            DebugLogger.log("[策略B-IC] 获取到 InputConnection ✓")
-
-            // 1. 读取当前输入框文本
-            try {
-                val surrounding = ic.getSurroundingText(500, 500, 0)
-                if (surrounding != null) {
-                    val fullText = surrounding.text?.toString() ?: ""
-                    val selStart = surrounding.selectionStart
-                    val selEnd = surrounding.selectionEnd
-                    val offset = surrounding.offset
-                    DebugLogger.log("[策略B-IC] 当前文本: '$fullText', sel=[$selStart,$selEnd], offset=$offset")
-                } else {
-                    DebugLogger.log("[策略B-IC] getSurroundingText 返回 null")
-                }
-            } catch (e: Exception) {
-                DebugLogger.log("[策略B-IC] getSurroundingText 异常: ${e.message}")
-            }
-
-            // 2. 全选：setSelection(0, 文本长度)
+            // 1. 全选：setSelection(0, 文本长度)
             ic.setSelection(0, originalText.length)
-            DebugLogger.log("[策略B-IC] setSelection(0, ${originalText.length})")
 
-            // 3. commitText 替换选中内容
+            // 2. commitText 替换选中内容
             ic.commitText(newText, 1, null)
-            DebugLogger.log("[策略B-IC] commitText('${newText.take(30)}...', 1)")
 
-            // 4. 验证结果
+            // 3. 验证结果
             try {
                 val verify = ic.getSurroundingText(500, 500, 0)
                 if (verify != null) {
                     val verifiedText = verify.text?.toString() ?: ""
-                    DebugLogger.log("[策略B-IC] 验证: '$verifiedText'")
                     if (verifiedText.contains(newText) || verifiedText == newText) {
-                        DebugLogger.log("[策略B-IC] ✅ 验证通过!")
                         return true
                     }
-                    DebugLogger.log("[策略B-IC] 验证不匹配")
                 }
-            } catch (e: Exception) {
-                DebugLogger.log("[策略B-IC] 验证异常: ${e.message}")
-            }
+            } catch (_: Exception) {}
 
-            // commitText 是 void 方法，不会"骗人"——如果没异常就很可能成功了
-            DebugLogger.log("[策略B-IC] commitText 执行完毕，推定成功")
             return true
-
-        } catch (e: Exception) {
-            DebugLogger.log("[策略B-IC] 异常: ${e.javaClass.simpleName}: ${e.message}")
+        } catch (_: Exception) {
             return false
         }
     }
@@ -248,10 +206,8 @@ class NyaAccessibilityService : AccessibilityService() {
             selectArgs.putInt(AccessibilityNodeInfo.ACTION_ARGUMENT_SELECTION_END_INT, originalText.length)
             val selectRes = node.performAction(AccessibilityNodeInfo.ACTION_SET_SELECTION, selectArgs)
             val pasteRes = node.performAction(AccessibilityNodeInfo.ACTION_PASTE)
-            DebugLogger.log("  clipboard: select=$selectRes, paste=$pasteRes")
             return selectRes && pasteRes
-        } catch (e: Exception) {
-            DebugLogger.log("  clipboard异常: ${e.message}")
+        } catch (_: Exception) {
             return false
         }
     }

@@ -10,7 +10,6 @@ import com.nya.helper.databinding.ActivityMainBinding
 import com.nya.helper.ui.AboutFragment
 import com.nya.helper.ui.ConfigFragment
 import com.nya.helper.ui.HomeFragment
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -41,20 +40,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * 该方法由 LSPosed Hook 覆写为返回 true，同时结合心跳进行双重精准检测
+     * 该方法由 LSPosed Hook 覆写为返回 true（纯内存级 Hook 检测）
      */
     fun isLsposedActiveDirect(): Boolean {
-        // 检测心跳记录（由宿主聊天应用中的 Hook 实时写入）
-        try {
-            val heartbeatFile = File(getExternalFilesDir(null), "lsposed_heartbeat")
-            if (heartbeatFile.exists() && heartbeatFile.canRead()) {
-                val time = heartbeatFile.readText().trim().toLongOrNull() ?: 0L
-                if (System.currentTimeMillis() - time < 86400_000) { // 24小时内有运行记录
-                    return true
-                }
-            }
-        } catch (e: Exception) {}
-
         return false
     }
 
