@@ -53,7 +53,7 @@
             style="?attr/materialCardViewFilledStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="16dp"
             app:cardCornerRadius="20dp">
 
             <LinearLayout
@@ -80,6 +80,73 @@
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="13sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 开发者与开源署名卡片 (Developer & Open Source Credits) -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="开发与开源署名 👨‍💻"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <!-- 署名 Chips 容器 -->
+                <com.google.android.material.chip.ChipGroup
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.Material3.Chip.Assist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="92ch41"
+                        android:textSize="12sp"
+                        app:chipCornerRadius="10dp" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.Material3.Chip.Assist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="KTDC"
+                        android:textSize="12sp"
+                        app:chipCornerRadius="10dp" />
+
+                    <com.google.android.material.chip.Chip
+                        style="@style/Widget.Material3.Chip.Assist"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="USCP"
+                        android:textSize="12sp"
+                        app:chipCornerRadius="10dp" />
+                </com.google.android.material.chip.ChipGroup>
+
+                <!-- GitHub 仓库跳转按钮 -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnOpenGitHub"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="GitHub 仓库 · KaiTeeDreamChai/nya-helper"
+                    android:textSize="13sp"
+                    app:cornerRadius="12dp" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -186,7 +253,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:lineSpacingMultiplier="1.25"
-                    android:text="• Hook API：LSPosed API 93 通用标准\n• 设计规范：Material Design 3 (Material You)\n• 进程同步：0ms 内存级广播通信机制"
+                    android:text="• Hook 引擎：LSPosed API 93 通用标准\n• 无障碍通道：Android 13+ InputConnection\n• 设计规范：Material Design 3 (Monet 动态取色)\n• 进程同步：0ms 内存级广播通信机制"
                     android:textAppearance="?attr/textAppearanceBodyMedium"
                     android:textColor="?attr/colorOutline"
                     android:textSize="12sp" />

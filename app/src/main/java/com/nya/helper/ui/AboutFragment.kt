@@ -3,6 +3,8 @@ package com.nya.helper.ui
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.view.LayoutInflater
@@ -30,11 +32,23 @@ class AboutFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupDebugLogs()
+        setupGitHubLink()
     }
 
     override fun onResume() {
         super.onResume()
         updateLogsDisplay()
+    }
+
+    private fun setupGitHubLink() {
+        binding.btnOpenGitHub.setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/KaiTeeDreamChai/nya-helper"))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "无法打开浏览器: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun setupDebugLogs() {
