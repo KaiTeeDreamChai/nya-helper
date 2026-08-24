@@ -32,6 +32,7 @@ class ConfigFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         loadConfig()
         setupListeners()
+        setupMultiUserActivator()
         updateLivePreview()
     }
 
@@ -100,28 +101,78 @@ class ConfigFragment : Fragment() {
         }
     }
 
+    private fun setupMultiUserActivator() {
+        binding.btnActivateMultiUser.setOnClickListener {
+            Thread {
+                try {
+                    val pkgName = requireContext().packageName
+                    val process = Runtime.getRuntime().exec(arrayOf("su", "-c", "pm list users"))
+                    val reader = process.inputStream.bufferedReader()
+                    val output = reader.readText()
+                    process.waitFor()
+
+                    val regex = Regex("UserInfo\\{(\\d+):")
+                    val userIds = regex.findAll(output).map { it.groupValues[1] }.filter { it != "0" }.toList()
+
+                    if (userIds.isEmpty()) {
+                        // 尝试直接安装至默认 999 分身空间
+                        val p = Runtime.getRuntime().exec(arrayOf("su", "-c", "pm install-existing --user 999 $pkgName"))
+                        p.waitFor()
+                        requireActivity().runOnUiThread {
+                            if (p.exitValue() == 0) {
+                                Snackbar.make(binding.root, "🐾 已为用户空间 999 安装模块！请在 LSPosed 勾选并重启分身", Snackbar.LENGTH_LONG).show()
+                            } else {
+                                Snackbar.make(binding.root, "未检测到分身用户空间，请确保已开启应用双开", Snackbar.LENGTH_SHORT).show()
+                            }
+                        }
+                        return@Thread
+                    }
+
+                    var successCount = 0
+                    for (uid in userIds) {
+                        val p = Runtime.getRuntime().exec(arrayOf("su", "-c", "pm install-existing --user $uid $pkgName"))
+                        p.waitFor()
+                        if (p.exitValue() == 0) {
+                            successCount++
+                        }
+                    }
+
+                    requireActivity().runOnUiThread {
+                        Snackbar.make(
+                            binding.root,
+                            "🐾 已成功为 $successCount 个分身空间激活模块！LSPosed 即可识别并勾选",
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    requireActivity().runOnUiThread {
+                        Snackbar.make(binding.root, "激活失败，请在 KernelSU 中允许 Root 权限", Snackbar.LENGTH_SHORT).show()
+                    }
+                }
+            }.start()
+        }
+    }
+
     private fun syncConfigFromUI() {
-        val baseConfig = ConfigManager.getConfig(requireContext())
-        currentConfig.triggerMode = baseConfig.triggerMode
         currentConfig.enableSentenceNya = binding.switchSentenceNya.isChecked
         currentConfig.enableReplaceI = binding.switchReplaceI.isChecked
         currentConfig.enableReplaceYou = binding.switchReplaceYou.isChecked
         currentConfig.enableKaomoji = binding.switchKaomoji.isChecked
         currentConfig.enableFumoKaomoji = binding.switchFumoKaomoji.isChecked
         currentConfig.enableMoodKaomoji = binding.switchMoodKaomoji.isChecked
+
         currentConfig.customFumoKaomojis = binding.etCustomFumoKaomoji.text?.toString() ?: ""
         currentConfig.customKaomojis = binding.etCustomKaomoji.text?.toString() ?: ""
         currentConfig.customReplacements = binding.etCustomReplacements.text?.toString() ?: ""
     }
 
     private fun updateLivePreview() {
-        syncConfigFromUI()
         val input = binding.etTestInput.text?.toString() ?: ""
-        val output = if (input.isNotBlank()) {
-            RuleEngine.transform(input, currentConfig)
-        } else {
-            "等待输入测试文字..."
+        if (input.isBlank()) {
+            binding.tvTestOutput.text = "等待输入测试文字..."
+            return
         }
+        val output = RuleEngine.transform(input, currentConfig)
         binding.tvTestOutput.text = output
     }
 

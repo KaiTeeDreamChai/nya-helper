@@ -138,49 +138,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 双开/分身应用支持卡片 (Multi-App Root Activator) -->
-        <com.google.android.material.card.MaterialCardView
-            style="?attr/materialCardViewFilledStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="18dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="双开 / 分身应用支持 (KernelSU / Root)"
-                    android:textAppearance="?attr/textAppearanceTitleMedium"
-                    android:textColor="?attr/colorOnSurface"
-                    android:textStyle="bold"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:text="自动检测系统分身空间，一键为双开的 QQ / 微信安装激活本模块"
-                    android:textAppearance="?attr/textAppearanceBodySmall"
-                    android:textColor="?attr/colorOutline"
-                    android:textSize="12sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnActivateMultiUser"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:text="一键激活双开分身支持"
-                    android:textSize="13sp"
-                    app:cornerRadius="12dp" />
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
 
         <!-- Trigger Mode Card -->
         <com.google.android.material.card.MaterialCardView

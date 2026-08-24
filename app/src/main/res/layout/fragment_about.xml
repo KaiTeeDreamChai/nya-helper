@@ -42,7 +42,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="v1.0.1 正式版"
+            android:text="v1.0.2 正式版"
             android:clickable="false"
             android:textSize="12sp"
             app:chipCornerRadius="10dp"
