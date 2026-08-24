@@ -251,6 +251,7 @@ class NyaHook : IXposedHookLoadPackage {
         }
 
         val config = ConfigManager.getConfig(editText.context)
+        if (!config.isMasterEnabled) return
         val transformed = RuleEngine.transform(currentText, config)
 
         if (transformed != currentText) {

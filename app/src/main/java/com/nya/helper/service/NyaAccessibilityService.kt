@@ -89,6 +89,9 @@ class NyaAccessibilityService : AccessibilityService() {
             }
 
             val config = ConfigManager.getConfig(this)
+            if (!config.isMasterEnabled) {
+                return
+            }
 
             if (config.triggerMode == NyaConfig.MODE_SEND_HOOK) {
                 return

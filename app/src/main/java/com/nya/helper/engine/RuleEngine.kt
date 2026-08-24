@@ -22,7 +22,7 @@ object RuleEngine {
      * Transform text according to configuration.
      */
     fun transform(input: String, config: NyaConfig): String {
-        if (input.isBlank()) return input
+        if (!config.isMasterEnabled || input.isBlank()) return input
 
         var text = input.trim()
 

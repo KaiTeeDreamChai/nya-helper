@@ -3,6 +3,7 @@ package com.nya.helper.model
 import org.json.JSONObject
 
 data class NyaConfig(
+    var isMasterEnabled: Boolean = true, // 助手总开关（一键启用/暂停所有萌化功能）
     var triggerMode: Int = MODE_SEND_HOOK, // 0: 发送拦截, 1: 标点触发, 2: 实时处理
     var enableSentenceNya: Boolean = true,
     var enableReplaceI: Boolean = true,
@@ -67,6 +68,7 @@ data class NyaConfig(
             return try {
                 val json = JSONObject(jsonStr)
                 NyaConfig(
+                    isMasterEnabled = json.optBoolean("isMasterEnabled", true),
                     triggerMode = json.optInt("triggerMode", MODE_SEND_HOOK),
                     enableSentenceNya = json.optBoolean("enableSentenceNya", true),
                     enableReplaceI = json.optBoolean("enableReplaceI", true),
@@ -86,6 +88,7 @@ data class NyaConfig(
 
     fun toJson(): String {
         val json = JSONObject()
+        json.put("isMasterEnabled", isMasterEnabled)
         json.put("triggerMode", triggerMode)
         json.put("enableSentenceNya", enableSentenceNya)
         json.put("enableReplaceI", enableReplaceI)

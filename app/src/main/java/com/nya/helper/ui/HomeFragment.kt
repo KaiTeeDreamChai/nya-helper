@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.snackbar.Snackbar
 import com.nya.helper.MainActivity
 import com.nya.helper.databinding.FragmentHomeBinding
 import com.nya.helper.engine.ConfigManager
@@ -29,13 +30,39 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupMasterSwitch()
         setupEngineStatus()
         setupTriggerMode()
     }
 
     override fun onResume() {
         super.onResume()
+        updateMasterSwitchUI()
         updateEngineStatus()
+    }
+
+    private fun setupMasterSwitch() {
+        binding.switchMaster.setOnCheckedChangeListener { _, isChecked ->
+            val currentConfig = ConfigManager.getConfig(requireContext())
+            if (currentConfig.isMasterEnabled != isChecked) {
+                currentConfig.isMasterEnabled = isChecked
+                ConfigManager.saveConfig(requireContext(), currentConfig)
+
+                val msg = if (isChecked) "🐾 助手已开启，萌化功能已恢复！" else "⏸️ 助手已一键暂停，所有萌化已停用"
+                Snackbar.make(binding.root, msg, Snackbar.LENGTH_SHORT).show()
+                updateMasterSwitchUI()
+            }
+        }
+    }
+
+    private fun updateMasterSwitchUI() {
+        val config = ConfigManager.getConfig(requireContext())
+        binding.switchMaster.isChecked = config.isMasterEnabled
+        if (config.isMasterEnabled) {
+            binding.tvMasterSwitchHint.text = "萌化功能运行中（LSPosed 与无障碍均生效）"
+        } else {
+            binding.tvMasterSwitchHint.text = "已暂停 · 点击右侧开关一键重新启用"
+        }
     }
 
     private fun setupEngineStatus() {

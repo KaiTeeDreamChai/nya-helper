@@ -123,4 +123,21 @@ class RuleEngineTest {
         val output = RuleEngine.transform(input, config)
         assertEquals("遵命主人，喵哈哈！", output)
     }
+
+    @Test
+    fun testMasterSwitchDisabled() {
+        val config = NyaConfig(
+            isMasterEnabled = false,
+            enableSentenceNya = true,
+            enableReplaceI = true,
+            enableReplaceYou = true,
+            enableKaomoji = true,
+            enableFumoKaomoji = true,
+            enableMoodKaomoji = true
+        )
+
+        val input = "我很高兴，你在干嘛？"
+        val output = RuleEngine.transform(input, config)
+        assertEquals("我很高兴，你在干嘛？", output) // 确保完全不被修改
+    }
 }
