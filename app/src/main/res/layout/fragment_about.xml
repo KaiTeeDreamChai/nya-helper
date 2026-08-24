@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="24dp"
+        android:paddingBottom="96dp">
+
+        <!-- App Icon with M3 Container -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="1dp"
+            app:strokeWidth="0dp">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_launcher_foreground" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/app_name"
+            android:textAppearance="?attr/textAppearanceTitleLarge"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold" />
+
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="v1.0.0 正式版"
+            android:clickable="false"
+            android:textSize="12sp"
+            app:chipCornerRadius="10dp"
+            app:chipStrokeWidth="0dp" />
+
+        <!-- Info Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardCornerRadius="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="关于助手 🐾"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:lineSpacingMultiplier="1.25"
+                    android:text="专注于将聊天输入自动萌化为猫娘体的高级安卓效率工具。\n\n• 采用 Material 3 规范与 Monet 动态壁纸取色\n• 深度集成 LSPosed / KernelSU 无感发送拦截\n• 8 大情景情绪识别与专属 Fumo 颜文字库"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 实时排错调试日志卡片 (Debug Log Viewer) -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="无障碍实时排错日志 🔍"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textStyle="bold"
+                        android:textSize="15sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnClearLogs"
+                        style="@style/Widget.Material3.Button.TextButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="清空"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnCopyLogs"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="复制日志"
+                        android:textSize="12sp"
+                        app:cornerRadius="10dp" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="在微信打字后切回此处，可查看底层捕获与注入详情"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <!-- Log Output Console Box -->
+                <TextView
+                    android:id="@+id/tvDebugLogs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:fontFamily="monospace"
+                    android:maxLines="12"
+                    android:padding="12dp"
+                    android:scrollbars="vertical"
+                    android:text="暂无日志。请在微信打字后切回本页面查看..."
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Tech Specs Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="技术架构"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:lineSpacingMultiplier="1.25"
+                    android:text="• Hook API：LSPosed API 93 通用标准\n• 设计规范：Material Design 3 (Material You)\n• 进程同步：0ms 内存级广播通信机制"
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

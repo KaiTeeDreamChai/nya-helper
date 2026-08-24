@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">QQ高级喵喵助手</string>
+    <string name="accessibility_service_label">QQ高级喵喵助手无障碍服务</string>
+    <string name="accessibility_service_description">用于在无需 Root/LSPosed 环境下，将聊天输入内容自动转换为猫娘体。</string>
+</resources>

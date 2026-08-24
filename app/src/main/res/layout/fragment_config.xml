@@ -1,0 +1,365 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="96dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="功能与规则配置"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="自定义萌化开关、颜文字库与词表"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOutline"
+            android:textSize="12sp" />
+
+        <!-- 基础转换开关卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="萌化开关"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <!-- 断句加喵 -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchSentenceNya"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:checked="true"
+                    android:text="句末加喵\n句号/问号/感叹号/句末添加「喵~」"
+                    android:textSize="13sp" />
+
+                <!-- 人称替换 我 -> 本喵 / 我们 -> 咱 -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchReplaceI"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="第一人称萌化\n「我们」→「咱」，「我」→「本喵」"
+                    android:textSize="13sp" />
+
+                <!-- 人称替换 你 -> 主人 -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchReplaceYou"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="第二人称萌化\n「你/您」→「主人」，「你们」→「主人们」"
+                    android:textSize="13sp" />
+
+                <!-- 经典猫咪颜文字 -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchKaomoji"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="经典猫咪颜文字\n(=^w^=)、(ฅ´ω`ฅ) 等"
+                    android:textSize="13sp" />
+
+                <!-- 随机 Fumo 颜文字 -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchFumoKaomoji"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="Fumo 颜文字\n(ᗜ ˰ ᗜ)、(ᗜ ⩊ ᗜ)、( ᗜ ˰ ᗜ )✧ 等"
+                    android:textSize="13sp" />
+
+                <!-- 情景情绪智能识别 -->
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/switchMoodKaomoji"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:checked="true"
+                    android:text="情景情绪识别\n按疑问/问候/愤怒/撒娇自动匹配专属表情"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 自定义 Fumo 颜文字卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义 Fumo 颜文字库"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="每行一个，留空使用内置库"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCustomFumoKaomoji"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:hint="例如:\n(ᗜ ˰ ᗜ)\n(ᗜ ⩊ ᗜ)و\n( ᗜ ˰ ᗜ )✧"
+                        android:inputType="textMultiLine"
+                        android:lines="3"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 自定义猫咪颜文字卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义经典颜文字库"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="每行一个，留空使用内置库"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCustomKaomoji"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:hint="例如:\n(=^w^=)\n(ฅ´ω`ฅ)\n(｡･ω･｡)ﾉ♡"
+                        android:inputType="textMultiLine"
+                        android:lines="3"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 自定义词表卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="自定义替换词表"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="格式：原文=替换文（每行一组）"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etCustomReplacements"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:hint="例如:\n好的=遵命主人\n哈哈=喵哈哈"
+                        android:inputType="textMultiLine"
+                        android:lines="3"
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 保存配置主按钮 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveConfig"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="保存并应用配置 🐾"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            app:cornerRadius="16dp"
+            app:elevation="2dp" />
+
+        <!-- 实时测试与预览卡片 -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="1dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="即时测试与效果预览"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:boxBackgroundMode="outline"
+                    app:boxCornerRadiusBottomEnd="14dp"
+                    app:boxCornerRadiusBottomStart="14dp"
+                    app:boxCornerRadiusTopEnd="14dp"
+                    app:boxCornerRadiusTopStart="14dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/etTestInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="输入文字实时测试效果..."
+                        android:textSize="13sp" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="转换输出："
+                    android:textAppearance="?attr/textAppearanceLabelMedium"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <!-- Output Display Bubble -->
+                <TextView
+                    android:id="@+id/tvTestOutput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:padding="12dp"
+                    android:text="等待输入测试文字..."
+                    android:textAppearance="?attr/textAppearanceBodyMedium"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

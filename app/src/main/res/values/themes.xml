@@ -1,0 +1,27 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Official Material 3 DayNight Theme with Material You (Monet) Dynamic Theming -->
+    <style name="Theme.NyaHelper" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Status Bar & Navigation Bar -->
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar" tools:targetApi="m">true</item>
+        
+        <!-- Shape appearance standard (M3 16dp / 24dp roundings) -->
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.M3.Corner.Small</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.M3.Corner.Medium</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.M3.Corner.Large</item>
+        
+        <!-- Window edge to edge -->
+        <item name="android:windowActivityTransitions">true</item>
+    </style>
+
+    <style name="ShapeAppearance.M3.Corner.Small" parent="ShapeAppearance.Material3.Corner.Small">
+        <item name="cornerSize">12dp</item>
+    </style>
+    <style name="ShapeAppearance.M3.Corner.Medium" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerSize">16dp</item>
+    </style>
+    <style name="ShapeAppearance.M3.Corner.Large" parent="ShapeAppearance.Material3.Corner.Large">
+        <item name="cornerSize">24dp</item>
+    </style>
+</resources>

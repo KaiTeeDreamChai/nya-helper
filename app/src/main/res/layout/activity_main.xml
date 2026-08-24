@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/coordinatorLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:title="🐾 QQ 喵喵助手"
+            app:titleCentered="true"
+            app:titleTextAppearance="?attr/textAppearanceTitleLarge" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="80dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
+    <!-- Official Material 3 NavigationBarView (Material You Floating Pill Indicator) -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomNavigation"
+        style="@style/Widget.Material3.BottomNavigationView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        app:labelVisibilityMode="labeled"
+        app:menu="@menu/bottom_nav_menu" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

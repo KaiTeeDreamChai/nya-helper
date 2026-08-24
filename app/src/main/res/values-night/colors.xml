@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#FF8A65</color>
+    <color name="primary_variant">#FF7043</color>
+    <color name="on_primary">#000000</color>
+    
+    <color name="secondary">#FFB74D</color>
+    <color name="on_secondary">#000000</color>
+    
+    <!-- Dark Mode Colors -->
+    <color name="background">#121212</color>
+    <color name="surface">#1E1E1E</color>
+    <color name="surface_variant">#2A2827</color>
+    <color name="on_surface">#E6E1E5</color>
+    <color name="on_surface_variant">#CAC4D0</color>
+    
+    <color name="status_active_bg">#1B3820</color>
+    <color name="status_active_text">#81C784</color>
+    <color name="status_inactive_bg">#3E1F21</color>
+    <color name="status_inactive_text">#E57373</color>
+    
+    <color name="card_stroke">#333333</color>
+    <color name="cat_orange">#FF8A65</color>
+    
+    <!-- Icon Colors (Dark: Black bg, White text) -->
+    <color name="icon_bg">#121212</color>
+    <color name="icon_fg">#FFFFFF</color>
+</resources>

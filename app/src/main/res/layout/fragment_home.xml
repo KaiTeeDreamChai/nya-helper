@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="96dp">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+            android:textColor="?attr/colorOnSurface"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="运行状态与触发模式"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOutline"
+            android:textSize="12sp" />
+
+        <!-- LSPosed Engine Status Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="18dp"
+            app:cardElevation="1dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:src="@drawable/ic_launcher_foreground"
+                    app:tint="?attr/colorPrimary" />
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="14dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="LSPosed 模块"
+                        android:textAppearance="?attr/textAppearanceTitleMedium"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textStyle="bold"
+                        android:textSize="15sp" />
+
+                    <TextView
+                        android:id="@+id/tvLsposedStatus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="检测状态中..."
+                        android:textAppearance="?attr/textAppearanceBodySmall"
+                        android:textColor="?attr/colorOutline"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="未激活"
+                    android:clickable="false"
+                    android:textSize="12sp"
+                    app:chipCornerRadius="10dp"
+                    app:chipStrokeWidth="0dp" />
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Accessibility Service Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="无障碍辅助服务"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/tvAccessibilityStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="未开启（免 Root 备用）"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnOpenAccessibility"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="开启无障碍"
+                    android:textSize="13sp"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 双开/分身应用支持卡片 (Multi-App Root Activator) -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewFilledStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="双开 / 分身应用支持 (KernelSU / Root)"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="自动检测系统分身空间，一键为双开的 QQ / 微信安装激活本模块"
+                    android:textAppearance="?attr/textAppearanceBodySmall"
+                    android:textColor="?attr/colorOutline"
+                    android:textSize="12sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnActivateMultiUser"
+                    style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:text="一键激活双开分身支持"
+                    android:textSize="13sp"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Trigger Mode Card -->
+        <com.google.android.material.card.MaterialCardView
+            style="?attr/materialCardViewOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardCornerRadius="18dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="触发模式"
+                    android:textAppearance="?attr/textAppearanceTitleMedium"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textStyle="bold"
+                    android:textSize="15sp" />
+
+                <RadioGroup
+                    android:id="@+id/rgTriggerMode"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp">
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/rbSendHook"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="4dp"
+                        android:text="发送拦截 (推荐 · Hook 专属)\n发送瞬间自动替换，打字完全无感"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/rbPunctuation"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:paddingVertical="4dp"
+                        android:text="标点触发\n输入句号、问号、感叹号时即刻替换"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.radiobutton.MaterialRadioButton
+                        android:id="@+id/rbRealtime"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:paddingVertical="4dp"
+                        android:text="实时打字处理\n边打字边实时萌化"
+                        android:textSize="13sp" />
+                </RadioGroup>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
