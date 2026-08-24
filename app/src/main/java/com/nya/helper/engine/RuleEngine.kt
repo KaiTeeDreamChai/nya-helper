@@ -157,9 +157,64 @@ object RuleEngine {
     }
 
     /**
-     * 根据情绪与开启的选项返回对应的专属情景颜文字（支持愤怒、Fumo 与猫咪双套）
+     * 中文高频单字回复精准情景识别与颜文字适配 (每个精准匹配一个专属颜文字)
+     */
+    fun getSingleWordKaomoji(rawText: String, config: NyaConfig): String? {
+        val core = rawText.replace(Regex("[。！？!?,，~～…\\s喵]"), "").trim().lowercase()
+        if (core.isEmpty() || core.length > 4) return null
+
+        val useFumo = config.enableFumoKaomoji
+        val useCat = config.enableKaomoji
+        if (!useFumo && !useCat) return null
+
+        return when {
+            // 1. 哦 / 噢 / 嗷 (冷漠/已知/收到)
+            core.matches(Regex("[哦噢嗷]+")) -> if (useFumo) "( ᗜ ˰ ᗜ )" else "(=^..^=)"
+
+            // 2. 额 / 呃 / 厄 (迟疑/无语/思考)
+            core.matches(Regex("[额呃厄]+")) -> if (useFumo) "(ᗜ ‸ ᗜ)" else "(・_・;)"
+
+            // 3. 啊 / 呀 / 哇 / 诶 (惊讶/恍然大悟)
+            core.matches(Regex("[啊呀哇诶]+")) -> if (useFumo) "( ᗜ ˰ ᗜ )✧" else "( >᎑< )!"
+
+            // 4. 草 / 焯 / 操 / 靠 / 淦 (震惊/暴躁/吐槽)
+            core.matches(Regex("[草焯操靠淦]+")) -> if (useFumo) "(ᗜ 益 ᗜ)" else "(╬•᷅д•᷄)"
+
+            // 5. 好 / 行 / 妥 (答应/赞同/乖巧)
+            core.matches(Regex("[好行妥]+|好哒|好滴|好的")) -> if (useFumo) "(ᗜ ⩊ ᗜ)و" else "(๑•̀ㅂ•́)و✧"
+
+            // 6. 对 / 是 / 确实 (肯定/确认/点赞)
+            core.matches(Regex("[对是]+|确实|对的")) -> if (useFumo) "(ᗜ ‿ ᗜ)b" else "( 'ω' )و"
+
+            // 7. 嗯 / 恩 (温和附和/聆听)
+            core.matches(Regex("[嗯恩]+")) -> if (useFumo) "(ᗜ ֊ ᗜ)" else "(ฅ´ω`ฅ)"
+
+            // 8. 哈 / 呵 / 嘻 (欢快/轻笑)
+            core.matches(Regex("[哈呵嘻]+")) -> if (useFumo) "(ᗜ ‿ ᗜ)" else "(=^w^=)"
+
+            // 9. 滚 / 走 / 爬 (嫌弃/愤怒驱逐)
+            core.matches(Regex("[滚走爬]+")) -> if (useFumo) "(╬ᗜ ˰ ᗜ)" else "(‵▽′)ψ"
+
+            // 10. 困 / 累 / 瘫 (疲倦/休眠)
+            core.matches(Regex("[困累瘫]+")) -> if (useFumo) "(ᗜ ˘ ᗜ)" else "(-.-)zzZ"
+
+            // 11. 不 / 别 / 否 (拒绝/抗拒)
+            core.matches(Regex("[不别否]+|不要")) -> if (useFumo) "(ᗜ ‸ ᗜ)?" else "(=^･ω･^=)?"
+
+            else -> null
+        }
+    }
+
+    /**
+     * 根据情绪与开启的选项返回对应的专属情景颜文字（支持愤怒、单字回复、Fumo 与猫咪双套）
      */
     private fun getMoodAwareKaomoji(text: String, config: NyaConfig): String {
+        // 优先匹配中文高频单字回复专属颜文字
+        val singleWordMatch = getSingleWordKaomoji(text, config)
+        if (singleWordMatch != null) {
+            return singleWordMatch
+        }
+
         val mood = detectMood(text)
         if (mood == Mood.DEFAULT) {
             return getSingleKaomoji(config)

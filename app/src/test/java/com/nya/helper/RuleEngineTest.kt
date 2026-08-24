@@ -140,4 +140,40 @@ class RuleEngineTest {
         val output = RuleEngine.transform(input, config)
         assertEquals("我很高兴，你在干嘛？", output) // 确保完全不被修改
     }
+
+    @Test
+    fun testSingleWordReplies() {
+        val fumoConfig = NyaConfig(
+            enableSentenceNya = true,
+            enableReplaceI = true,
+            enableReplaceYou = true,
+            enableKaomoji = false,
+            enableFumoKaomoji = true,
+            enableMoodKaomoji = true
+        )
+
+        // 测试各种单字回复与标点
+        assertEquals("哦喵~ ( ᗜ ˰ ᗜ )", RuleEngine.transform("哦", fumoConfig))
+        assertEquals("额喵~ (ᗜ ‸ ᗜ)", RuleEngine.transform("额", fumoConfig))
+        assertEquals("啊喵！ ( ᗜ ˰ ᗜ )✧", RuleEngine.transform("啊！", fumoConfig))
+        assertEquals("草喵~ (ᗜ 益 ᗜ)", RuleEngine.transform("草", fumoConfig))
+        assertEquals("好喵~ (ᗜ ⩊ ᗜ)و", RuleEngine.transform("好", fumoConfig))
+        assertEquals("对喵~ (ᗜ ‿ ᗜ)b", RuleEngine.transform("对", fumoConfig))
+        assertEquals("嗯喵~ (ᗜ ֊ ᗜ)", RuleEngine.transform("嗯", fumoConfig))
+        assertEquals("滚喵！ (╬ᗜ ˰ ᗜ)", RuleEngine.transform("滚！", fumoConfig))
+
+        // 猫咪专属单字回复
+        val catConfig = NyaConfig(
+            enableSentenceNya = true,
+            enableReplaceI = true,
+            enableReplaceYou = true,
+            enableKaomoji = true,
+            enableFumoKaomoji = false,
+            enableMoodKaomoji = true
+        )
+        assertEquals("哦喵~ (=^..^=)", RuleEngine.transform("哦", catConfig))
+        assertEquals("草喵~ (╬•᷅д•᷄)", RuleEngine.transform("草", catConfig))
+        assertEquals("好喵~ (๑•̀ㅂ•́)و✧", RuleEngine.transform("好", catConfig))
+        assertEquals("对喵~ ( 'ω' )و", RuleEngine.transform("对", catConfig))
+    }
 }
