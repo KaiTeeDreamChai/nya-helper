@@ -156,7 +156,8 @@ class RuleEngineTest {
         assertEquals("哦喵~ ( ᗜ ˰ ᗜ )", RuleEngine.transform("哦", fumoConfig))
         assertEquals("额喵~ (ᗜ ‸ ᗜ)", RuleEngine.transform("额", fumoConfig))
         assertEquals("啊喵！ ( ᗜ ˰ ᗜ )✧", RuleEngine.transform("啊！", fumoConfig))
-        assertEquals("草喵~ (ᗜ 益 ᗜ)", RuleEngine.transform("草", fumoConfig))
+        assertEquals("草喵~ ( ᗜ ˰ ᗜ )✧", RuleEngine.transform("草", fumoConfig)) // 草 -> 惊讶
+        assertEquals("操喵！ (ᗜ 益 ᗜ)", RuleEngine.transform("操！", fumoConfig)) // 操 -> 愤怒
         assertEquals("好喵~ (ᗜ ⩊ ᗜ)و", RuleEngine.transform("好", fumoConfig))
         assertEquals("对喵~ (ᗜ ‿ ᗜ)b", RuleEngine.transform("对", fumoConfig))
         assertEquals("嗯喵~ (ᗜ ֊ ᗜ)", RuleEngine.transform("嗯", fumoConfig))
@@ -172,7 +173,8 @@ class RuleEngineTest {
             enableMoodKaomoji = true
         )
         assertEquals("哦喵~ (=^..^=)", RuleEngine.transform("哦", catConfig))
-        assertEquals("草喵~ (╬•᷅д•᷄)", RuleEngine.transform("草", catConfig))
+        assertEquals("草喵~ ( >᎑< )!", RuleEngine.transform("草", catConfig)) // 草 -> 惊讶
+        assertEquals("操喵！ (╬•᷅д•᷄)", RuleEngine.transform("操！", catConfig)) // 操 -> 愤怒
         assertEquals("好喵~ (๑•̀ㅂ•́)و✧", RuleEngine.transform("好", catConfig))
         assertEquals("对喵~ ( 'ω' )و", RuleEngine.transform("对", catConfig))
     }

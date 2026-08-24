@@ -85,10 +85,10 @@ object RuleEngine {
     fun detectMood(text: String): Mood {
         val lower = text.lowercase().trim()
 
-        // 1. 愤怒 / 生气 / 斥责 / 常用口头情绪词
+        // 1. 愤怒 / 生气 / 斥责 / 真正口头粗口
         val angryKeywords = listOf(
-            "滚", "闭嘴", "烦死", "去死", "神经病", "脑瘫", "白痴", "傻逼", "傻逼",
-            "蠢货", "傻缺", "草泥马", "草", "操", "靠", "妈的", "他妈的", "特么的",
+            "滚", "闭嘴", "烦死", "去死", "神经病", "脑瘫", "白痴", "傻逼",
+            "蠢货", "傻缺", "操", "妈的", "他妈的", "特么的",
             "真烦", "恶心", "有病", "狗叫", "弱智", "废物", "欠揍", "找死", "讨厌你",
             "气死我了", "气死", "生气", "愤怒", "去你的", "见鬼"
         )
@@ -114,11 +114,11 @@ object RuleEngine {
             return Mood.QUESTION
         }
 
-        // 4. 惊讶 / 惊叹 / 强烈语气
+        // 4. 惊讶 / 惊叹 / 强烈语气 / 生草
         val isExclamationEnding = lower.endsWith("！") || lower.endsWith("!") ||
                 lower.endsWith("啊") || lower.endsWith("呀") || lower.endsWith("哇") ||
                 lower.endsWith("耶") || lower.endsWith("喵！") || lower.endsWith("喵!")
-        val exclamationKeywords = listOf("哇塞", "天哪", "天呐", "震惊", "好厉害", "不会吧", "太神了")
+        val exclamationKeywords = listOf("哇塞", "天哪", "天呐", "震惊", "好厉害", "不会吧", "太神了", "草", "卧槽", "我草", "woc", "焯", "靠", "淦")
         if (isExclamationEnding || exclamationKeywords.any { lower.contains(it) }) {
             return Mood.EXCLAMATION
         }
@@ -177,10 +177,13 @@ object RuleEngine {
             // 3. 啊 / 呀 / 哇 / 诶 (惊讶/恍然大悟)
             core.matches(Regex("[啊呀哇诶]+")) -> if (useFumo) "( ᗜ ˰ ᗜ )✧" else "( >᎑< )!"
 
-            // 4. 草 / 焯 / 操 / 靠 / 淦 (震惊/暴躁/吐槽)
-            core.matches(Regex("[草焯操靠淦]+")) -> if (useFumo) "(ᗜ 益 ᗜ)" else "(╬•᷅д•᷄)"
+            // 4. 草 / 焯 / 靠 / 淦 (惊讶/生草/震惊)
+            core.matches(Regex("[草焯靠淦]+|卧槽|我草|woc")) -> if (useFumo) "( ᗜ ˰ ᗜ )✧" else "( >᎑< )!"
 
-            // 5. 好 / 行 / 妥 (答应/赞同/乖巧)
+            // 5. 操 / 日 / 妈的 (真正愤怒/暴躁)
+            core.matches(Regex("[操日]+|妈的|他妈的|去死")) -> if (useFumo) "(ᗜ 益 ᗜ)" else "(╬•᷅д•᷄)"
+
+            // 6. 好 / 行 / 妥 (答应/赞同/乖巧)
             core.matches(Regex("[好行妥]+|好哒|好滴|好的")) -> if (useFumo) "(ᗜ ⩊ ᗜ)و" else "(๑•̀ㅂ•́)و✧"
 
             // 6. 对 / 是 / 确实 (肯定/确认/点赞)
