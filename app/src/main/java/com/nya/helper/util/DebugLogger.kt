@@ -23,6 +23,11 @@ object DebugLogger {
 
     fun getLogs(): List<String> = logs.toList()
 
+    fun getRecentLogs(count: Int = 10): List<String> {
+        val list = logs.toList()
+        return if (list.size <= count) list else list.takeLast(count)
+    }
+
     fun getAllLogsText(): String {
         if (logs.isEmpty()) {
             return "暂无日志记录。请开启无障碍服务并在微信/QQ中打字测试。"

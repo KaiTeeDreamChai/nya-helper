@@ -178,4 +178,25 @@ class RuleEngineTest {
         assertEquals("好喵~ (๑•̀ㅂ•́)و✧", RuleEngine.transform("好", catConfig))
         assertEquals("对喵~ ( 'ω' )و", RuleEngine.transform("对", catConfig))
     }
+
+    @Test
+    fun testDebugTrigger() {
+        val config = NyaConfig(isMasterEnabled = true)
+
+        assertTrue(RuleEngine.isDebugTrigger("测试"))
+        assertTrue(RuleEngine.isDebugTrigger("测试。"))
+        assertTrue(RuleEngine.isDebugTrigger("test"))
+        assertTrue(RuleEngine.isDebugTrigger("TEST!"))
+        assertTrue(RuleEngine.isDebugTrigger(" Test "))
+        assertFalse(RuleEngine.isDebugTrigger("这是一个测试"))
+        assertFalse(RuleEngine.isDebugTrigger("testing"))
+
+        val reportZh = RuleEngine.transform("测试", config)
+        assertTrue(reportZh.contains("🐾【喵喵助手 Debug 诊断报告】🐾"))
+        assertTrue(reportZh.contains("v1.0.8.1 正式版"))
+        assertTrue(reportZh.contains("最近 10 行运行日志"))
+
+        val reportEn = RuleEngine.transform("test", config)
+        assertTrue(reportEn.contains("🐾【喵喵助手 Debug 诊断报告】🐾"))
+    }
 }

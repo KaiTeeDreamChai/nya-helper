@@ -26,6 +26,11 @@ object RuleEngine {
 
         var text = input.trim()
 
+        // 0. 特殊场景识别规则：用户只发送“测试”两个字或单词 "test" 时，自动触发 Debug 模式诊断报告
+        if (isDebugTrigger(text)) {
+            return generateDebugReport(config)
+        }
+
         // 1. 预处理：若末尾已存在颜文字，先剥离，避免对颜文字重复加喵
         val (strippedText, existingKaomoji) = stripTrailingKaomoji(text, config)
         text = strippedText
@@ -379,5 +384,44 @@ object RuleEngine {
         } else {
             ""
         }
+    }
+
+    /**
+     * 判断是否触发 Debug 模式诊断（用户仅输入“测试”或单个单词 "test"）
+     */
+    fun isDebugTrigger(input: String): Boolean {
+        val clean = input.trim().trim('。', '！', '!', '？', '?', '~', '～', '.', ' ', '\t', '\n', ',', '，')
+        return clean == "测试" || clean.equals("test", ignoreCase = true)
+    }
+
+    /**
+     * 生成并在聊天框输出最近 10 行日志与当前运行状态说明
+     */
+    fun generateDebugReport(config: NyaConfig): String {
+        val recentLogs = com.nya.helper.util.DebugLogger.getRecentLogs(10)
+        val modeStr = when (config.triggerMode) {
+            NyaConfig.MODE_SEND_HOOK -> "发送拦截模式"
+            NyaConfig.MODE_PUNCTUATION -> "标点触发模式"
+            else -> "实时监听模式"
+        }
+        val masterStr = if (config.isMasterEnabled) "已开启" else "已停用"
+        val moodStr = if (config.enableMoodKaomoji) "已开启" else "已停用"
+        val nyaStr = if (config.enableSentenceNya) "已开启" else "已停用"
+
+        val sb = StringBuilder()
+        sb.append("🐾【喵喵助手 Debug 诊断报告】🐾\n")
+        sb.append("📊 运行状态: 引擎正常运行中 (v1.0.8.1 正式版)\n")
+        sb.append("⚙️ 触发模式: $modeStr | 总开关: $masterStr\n")
+        sb.append("🎭 智能情景: $moodStr | 断句加喵: $nyaStr\n")
+        sb.append("📋 最近 10 行运行日志:\n")
+        if (recentLogs.isEmpty()) {
+            sb.append("• [系统] 引擎正常待命，内存纯净 0 异常喵 ~\n")
+        } else {
+            recentLogs.forEach { logLine ->
+                sb.append("• $logLine\n")
+            }
+        }
+        sb.append("✨ 诊断完成，运行一切健康喵 (ฅ'ω'ฅ)")
+        return sb.toString().trim()
     }
 }
