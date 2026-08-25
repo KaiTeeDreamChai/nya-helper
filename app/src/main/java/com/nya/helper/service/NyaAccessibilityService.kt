@@ -1,11 +1,9 @@
 package com.nya.helper.service
 
 import android.accessibilityservice.AccessibilityService
-import android.accessibilityservice.InputMethod
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -28,20 +26,10 @@ class NyaAccessibilityService : AccessibilityService() {
     private var lastTransformTime = 0L
     private val mainHandler = Handler(Looper.getMainLooper())
 
-    // Android 13+ InputMethod API
-    private var nyaInputMethod: InputMethod? = null
-
     override fun onServiceConnected() {
         super.onServiceConnected()
         isServiceRunning = true
-        DebugLogger.log("无障碍服务已连接 (onServiceConnected)")
-    }
-
-    override fun onCreateInputMethod(): InputMethod {
-        DebugLogger.log("onCreateInputMethod() 被调用 - InputMethod API 可用")
-        val im = super.onCreateInputMethod()
-        nyaInputMethod = im
-        return im
+        DebugLogger.log("无障碍服务已连接 (标准安全模式)")
     }
 
     override fun onDestroy() {
@@ -107,8 +95,8 @@ class NyaAccessibilityService : AccessibilityService() {
                 // 拟人化微抖动延迟 (15~30ms)，避免 0ms 机械注入触发客户端异常行为风控
                 val jitterDelay = Random.nextLong(15, 30)
                 mainHandler.postDelayed({
-                    val success = injectText(sourceNode, currentText, transformed, nodeEditable, pkg)
-                    DebugLogger.log("最终注入结果: $success (jitter=${jitterDelay}ms)")
+                    val success = injectText(sourceNode, currentText, transformed, nodeEditable)
+                    DebugLogger.log("无障碍文本转换结果: $success (延迟=${jitterDelay}ms)")
                     mainHandler.postDelayed({ isModifying = false }, 250)
                 }, jitterDelay)
             }
@@ -120,28 +108,10 @@ class NyaAccessibilityService : AccessibilityService() {
         node: AccessibilityNodeInfo,
         originalText: String,
         newText: String,
-        isEditable: Boolean,
-        pkg: String
+        isEditable: Boolean
     ): Boolean {
-        val isTencentChatApp = pkg == "com.tencent.mobileqq" || pkg == "com.tencent.mm" || pkg == "com.tencent.tim"
-
-        // ============================================================
-        // 策略 1 (最高优先级): Android 13+ InputConnection API
-        // 走系统标准输入法内核通道，和搜狗/Gboard键盘完全相同，QQ/微信反作弊系统无法区分
-        // ============================================================
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val success = injectViaInputConnection(originalText, newText)
-            if (success) {
-                DebugLogger.log("[InputConnection] ✅ 拟人化输入法通道注入成功")
-                return true
-            }
-        }
-
-        // ============================================================
-        // 策略 2: 普通 App 的 ACTION_SET_TEXT 兜底
-        // (对 QQ / 微信坚决不调用 ACTION_SET_TEXT，避免被安全组件判定为无障碍自动化外挂)
-        // ============================================================
-        if (!isTencentChatApp && isEditable) {
+        // 策略 1: Android 标准无障碍文本修改 API
+        if (isEditable) {
             val args = Bundle()
             args.putCharSequence(
                 AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
@@ -149,43 +119,12 @@ class NyaAccessibilityService : AccessibilityService() {
             )
             val result = node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args)
             if (result) {
-                node.refresh()
-                val actual = node.text?.toString() ?: ""
-                if (actual == newText) {
-                    DebugLogger.log("[ACTION_SET_TEXT] ✅ 验证通过")
-                    return true
-                }
+                return true
             }
         }
 
-        // ============================================================
-        // 策略 3: 非腾讯应用的剪贴板降级
-        // ============================================================
-        if (!isTencentChatApp) {
-            return tryClipboardPaste(node, originalText, newText)
-        }
-
-        return false
-    }
-
-    /**
-     * 通过 InputConnection 直接操作文本（和官方输入法完全相同的合法通道）
-     */
-    @Suppress("NewApi")
-    private fun injectViaInputConnection(originalText: String, newText: String): Boolean {
-        try {
-            val im = nyaInputMethod ?: return false
-            val ic = im.currentInputConnection ?: return false
-
-            // 1. 全选旧文本：setSelection(0, 文本长度)
-            ic.setSelection(0, originalText.length)
-
-            // 2. commitText 像输入法候选词一样原子替换
-            ic.commitText(newText, 1, null)
-            return true
-        } catch (_: Exception) {
-            return false
-        }
+        // 策略 2: 剪贴板降级注入
+        return tryClipboardPaste(node, originalText, newText)
     }
 
     private fun tryClipboardPaste(node: AccessibilityNodeInfo, originalText: String, newText: String): Boolean {
