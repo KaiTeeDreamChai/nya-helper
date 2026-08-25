@@ -51,14 +51,17 @@ class NyaAccessibilityService : AccessibilityService() {
     }
 
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
-        if (event == null) return
+        if (event == null || isModifying) return
 
         val pkg = event.packageName?.toString() ?: ""
-        if (pkg == "com.nya.helper" || pkg.startsWith("com.android.systemui")) return
+        if (pkg == "com.nya.helper" || pkg.startsWith("com.android.systemui") || pkg.startsWith("android")) return
+
+        val config = ConfigManager.getConfig(this)
+        if (!config.isMasterEnabled || config.triggerMode == NyaConfig.MODE_SEND_HOOK) {
+            return
+        }
 
         val eventType = event.eventType
-        if (isModifying) return
-
         if (eventType == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
             // 纯退格删除检测
             if (event.removedCount > 0 && event.addedCount == 0) {
@@ -79,21 +82,11 @@ class NyaAccessibilityService : AccessibilityService() {
 
             if (currentText.isBlank()) return
 
-            val nodeClass = sourceNode?.className?.toString() ?: "unknown"
             val nodeEditable = sourceNode?.isEditable ?: false
 
             // 防循环与高频防抖（800ms 内相同内容直接跳过，避免高频触发反作弊）
             val now = System.currentTimeMillis()
             if (currentText == lastTransformedText && now - lastTransformTime < 800) {
-                return
-            }
-
-            val config = ConfigManager.getConfig(this)
-            if (!config.isMasterEnabled) {
-                return
-            }
-
-            if (config.triggerMode == NyaConfig.MODE_SEND_HOOK) {
                 return
             }
 

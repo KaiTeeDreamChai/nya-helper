@@ -36,6 +36,7 @@ class NyaHook : IXposedHookLoadPackage {
 
     override fun handleLoadPackage(lpparam: XC_LoadPackage.LoadPackageParam) {
         val packageName = lpparam.packageName
+        val processName = lpparam.processName
 
         // 1. Hook 本应用以报告 LSPosed 激活状态
         if (packageName == "com.nya.helper") {
@@ -43,9 +44,24 @@ class NyaHook : IXposedHookLoadPackage {
             return
         }
 
-        // 2. 忽略系统底层核心服务，对勾选的作用域应用生效
-        if (packageName == "android" || packageName.startsWith("com.android.")) {
+        // 2. 忽略系统底层核心服务
+        if (packageName == "android" || packageName.startsWith("com.android.") || packageName.startsWith("com.google.android.")) {
             return
+        }
+
+        // 3. 严格进程级隐身白名单：仅注入主 UI 进程，坚决不触碰任何后台安全/网络进程（如 :MSF, :web, :tool, :push 等）
+        if (packageName == "com.tencent.mobileqq") {
+            if (processName != "com.tencent.mobileqq") {
+                return // 100% 避开 com.tencent.mobileqq:MSF 安全与通信进程
+            }
+        } else if (packageName == "com.tencent.mm") {
+            if (processName != "com.tencent.mm") {
+                return // 100% 避开微信后台及小程序子进程
+            }
+        } else {
+            if (processName != packageName) {
+                return
+            }
         }
 
         hookChatApp(lpparam)
@@ -70,23 +86,11 @@ class NyaHook : IXposedHookLoadPackage {
     }
 
     /**
-     * 挂载聊天应用 Hook（极速无损、防卡死、防风控检测设计）
+     * 挂载聊天应用 Hook（极速无损、主 UI 进程限定、零敏感文件与内存隐身）
      */
     private fun hookChatApp(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
-            // Hook 0: 监听 Application.onCreate 注册动态配置更新广播
-            XposedHelpers.findAndHookMethod(
-                Application::class.java,
-                "onCreate",
-                object : XC_MethodHook() {
-                    override fun afterHookedMethod(param: MethodHookParam) {
-                        val app = param.thisObject as? Application ?: return
-                        registerConfigReceiver(app)
-                    }
-                }
-            )
-
-            // Hook 1: 当 EditText 进入界面时，自动挂载智能 TextWatcher 并记录当前活跃输入框
+            // Hook 1: 当 EditText 进入主界面时，自动挂载智能 TextWatcher 并记录当前活跃输入框
             XposedHelpers.findAndHookMethod(
                 TextView::class.java,
                 "onAttachedToWindow",

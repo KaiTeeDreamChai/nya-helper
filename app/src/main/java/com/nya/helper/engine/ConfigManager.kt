@@ -45,32 +45,9 @@ object ConfigManager {
             return config
         }
 
-        // 2. 如果在 Hook 进程中（包括双开/分身用户空间 999/10/888）
-        // 渠道 A: 全局跨用户公共缓存 (/data/local/tmp 对所有多用户空间均开放可读)
-        try {
-            val multiUserFiles = listOf(
-                File("/data/local/tmp/nya_config.json"),
-                File("/sdcard/Android/data/com.nya.helper/files/nya_config.json"),
-                File("/storage/emulated/0/Android/data/com.nya.helper/files/nya_config.json"),
-                File("/storage/emulated/999/Android/data/com.nya.helper/files/nya_config.json"),
-                File("/storage/emulated/10/Android/data/com.nya.helper/files/nya_config.json")
-            )
-            for (f in multiUserFiles) {
-                if (f.exists() && f.canRead()) {
-                    val json = f.readText()
-                    if (json.isNotBlank()) {
-                        val config = NyaConfig.fromJson(json)
-                        cachedConfig = config
-                        lastFetchTime = now
-                        return config
-                    }
-                }
-            }
-        } catch (t: Throwable) {
-            // ignore
-        }
-
-        // 渠道 B: LSPosed XSharedPreferences
+        // 2. 如果在 Hook 宿主进程中（QQ / 微信 等）
+        // 绝对不在宿主进程内执行任何外置文件/目录探测，彻底杜绝宿主沙盒探测与 SELinux 警报
+        // 渠道 A: 优先使用 LSPosed 内存级 XSharedPreferences (由 LSPosed 守护进程管理)
         try {
             if (xSharedPrefs == null) {
                 xSharedPrefs = XSharedPreferences("com.nya.helper", PREFS_NAME)
@@ -84,11 +61,9 @@ object ConfigManager {
                 lastFetchTime = now
                 return config
             }
-        } catch (t: Throwable) {
-            // ignore
-        }
+        } catch (_: Throwable) {}
 
-        // 渠道 C: ContentProvider
+        // 渠道 B: 跨进程 ContentProvider 安全调用
         if (context != null) {
             try {
                 val bundle = context.contentResolver.call(
@@ -104,9 +79,7 @@ object ConfigManager {
                     lastFetchTime = now
                     return config
                 }
-            } catch (e: Exception) {
-                // ignore
-            }
+            } catch (_: Throwable) {}
         }
 
         return cachedConfig ?: NyaConfig()
@@ -119,56 +92,21 @@ object ConfigManager {
     fun saveConfig(context: Context, config: NyaConfig) {
         val json = config.toJson()
 
-        // 1. 保存 SharedPreferences
+        // 1. 保存 SharedPreferences (供 LSPosed XSharedPreferences 与 ContentProvider 读取)
         try {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_WORLD_READABLE)
             prefs.edit().putString(KEY_CONFIG, json).commit()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().putString(KEY_CONFIG, json).commit()
         }
 
-        // 2. 写入全局可读存储文件（同时覆盖主用户与 999 双开多用户目录）
-        try {
-            val tmpFile = File("/data/local/tmp/nya_config.json")
-            tmpFile.writeText(json)
-            tmpFile.setReadable(true, false)
-        } catch (e: Exception) {
-            // ignore
-        }
-
-        try {
-            val extDir = context.getExternalFilesDir(null)
-            if (extDir != null) {
-                extDir.mkdirs()
-                val extFile = File(extDir, "nya_config.json")
-                extFile.writeText(json)
-                extFile.setReadable(true, false)
-            }
-        } catch (e: Exception) {
-            // ignore
-        }
-
-        try {
-            val cloneDir = File("/storage/emulated/999/Android/data/com.nya.helper/files")
-            if (cloneDir.exists() || cloneDir.parentFile?.exists() == true) {
-                cloneDir.mkdirs()
-                val cloneFile = File(cloneDir, "nya_config.json")
-                cloneFile.writeText(json)
-                cloneFile.setReadable(true, false)
-            }
-        } catch (e: Exception) {
-            // ignore
-        }
-
-        // 3. 发送全局跨进程广播
+        // 2. 发送全局跨进程动态更新广播 (内存级即时同步，不落盘任何标记文件)
         try {
             val intent = Intent(ACTION_CONFIG_CHANGED)
             intent.putExtra(EXTRA_CONFIG_JSON, json)
             context.sendBroadcast(intent)
-        } catch (e: Exception) {
-            // ignore
-        }
+        } catch (_: Exception) {}
 
         cachedConfig = config
         lastFetchTime = System.currentTimeMillis()
