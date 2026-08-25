@@ -86,21 +86,25 @@ class NyaHook : IXposedHookLoadPackage {
      * 挂载聊天应用 Hook（极速无损、主 UI 进程限定、零敏感文件与内存隐身）
      */
     private fun hookChatApp(lpparam: XC_LoadPackage.LoadPackageParam) {
+        // Hook 1: 当 View 挂载到窗口时，精准筛选 EditText 挂载智能 TextWatcher
         try {
-            // Hook 1: 精准限定于 EditText.onAttachedToWindow，坚决不污染普通 TextView (气泡、标签、标题等)
             XposedHelpers.findAndHookMethod(
-                EditText::class.java,
+                TextView::class.java,
                 "onAttachedToWindow",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val editText = param.thisObject as? EditText ?: return
-                        currentActiveEditText = WeakReference(editText)
-                        attachSmartTextWatcher(editText)
+                        val textView = param.thisObject as? TextView ?: return
+                        if (textView is EditText) {
+                            currentActiveEditText = WeakReference(textView)
+                            attachSmartTextWatcher(textView)
+                        }
                     }
                 }
             )
+        } catch (_: Throwable) {}
 
-            // Hook 2: 软键盘“发送”或回车键拦截 (IME Action Send)
+        // Hook 2: 软键盘“发送”或回车键拦截 (IME Action Send)
+        try {
             XposedHelpers.findAndHookMethod(
                 TextView::class.java,
                 "onEditorAction",
@@ -120,8 +124,10 @@ class NyaHook : IXposedHookLoadPackage {
                     }
                 }
             )
+        } catch (_: Throwable) {}
 
-            // Hook 3: 精准点击拦截 (针对 View.performClick 进行轻量级匹配，避免全局 setOnClickListener 死锁)
+        // Hook 3: 精准点击拦截 (针对 View.performClick 进行轻量级匹配，避免全局 setOnClickListener 死锁)
+        try {
             XposedHelpers.findAndHookMethod(
                 View::class.java,
                 "performClick",
@@ -129,7 +135,7 @@ class NyaHook : IXposedHookLoadPackage {
                     override fun beforeHookedMethod(param: MethodHookParam) {
                         val view = param.thisObject as? View ?: return
                         if (isLikelySendButton(view)) {
-                            val activeEt = currentActiveEditText?.get()
+                            val activeEt = findActiveEditText(view)
                             if (activeEt != null && activeEt.isAttachedToWindow) {
                                 transformEditText(activeEt, isSendEvent = true)
                             }
@@ -137,8 +143,23 @@ class NyaHook : IXposedHookLoadPackage {
                     }
                 }
             )
-
         } catch (_: Throwable) {}
+    }
+
+    /**
+     * 智能定位当前活跃的输入框（多重兜底：弱引用缓存 -> 根节点焦点搜索）
+     */
+    private fun findActiveEditText(sendButton: View): EditText? {
+        val cached = currentActiveEditText?.get()
+        if (cached != null && cached.isAttachedToWindow) {
+            return cached
+        }
+        val focused = sendButton.rootView?.findFocus()
+        if (focused is EditText) {
+            currentActiveEditText = WeakReference(focused)
+            return focused
+        }
+        return null
     }
 
     /**
@@ -161,19 +182,13 @@ class NyaHook : IXposedHookLoadPackage {
     }
 
     /**
-     * 智能挂载 TextWatcher（纯内存 WeakHashMap 判重，零 View 结构改动）
+     * 智能挂载 TextWatcher（纯内存 WeakHashMap 判重，零 View 结构改动，绝不覆写系统 OnFocusChangeListener）
      */
     private fun attachSmartTextWatcher(editText: EditText) {
         if (attachedWatchers.contains(editText)) return
         attachedWatchers.add(editText)
 
         var isDeleting = false
-
-        editText.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                currentActiveEditText = WeakReference(editText)
-            }
-        }
 
         editText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {

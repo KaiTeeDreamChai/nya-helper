@@ -11,8 +11,8 @@ android {
         applicationId = "com.nya.helper"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1084
-        versionName = "1.0.8.4"
+        versionCode = 1085
+        versionName = "1.0.8.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

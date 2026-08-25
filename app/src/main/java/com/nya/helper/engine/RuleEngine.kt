@@ -410,7 +410,7 @@ object RuleEngine {
 
         val sb = StringBuilder()
         sb.append("🐾【喵喵助手 Debug 诊断报告】🐾\n")
-        sb.append("📊 运行状态: 引擎正常运行中 (v1.0.8.4 正式版)\n")
+        sb.append("📊 运行状态: 引擎正常运行中 (v1.0.8.5 正式版)\n")
         sb.append("⚙️ 触发模式: $modeStr | 总开关: $masterStr\n")
         sb.append("🎭 智能情景: $moodStr | 断句加喵: $nyaStr\n")
         sb.append("📋 最近 10 行运行日志:\n")

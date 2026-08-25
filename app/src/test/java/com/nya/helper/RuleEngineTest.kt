@@ -193,7 +193,7 @@ class RuleEngineTest {
 
         val reportZh = RuleEngine.transform("测试", config)
         assertTrue(reportZh.contains("🐾【喵喵助手 Debug 诊断报告】🐾"))
-        assertTrue(reportZh.contains("v1.0.8.4 正式版"))
+        assertTrue(reportZh.contains("v1.0.8.5 正式版"))
         assertTrue(reportZh.contains("最近 10 行运行日志"))
 
         val reportEn = RuleEngine.transform("test", config)
