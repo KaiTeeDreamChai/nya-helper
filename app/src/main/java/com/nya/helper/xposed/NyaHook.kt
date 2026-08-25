@@ -1,11 +1,5 @@
 package com.nya.helper.xposed
 
-import android.app.Application
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
-import android.os.Build
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -28,7 +22,6 @@ class NyaHook : IXposedHookLoadPackage {
         private var isModifying = false
         private var lastTransformedText = ""
         private var lastTransformTime = 0L
-        private var isReceiverRegistered = false
 
         // 当前活跃的输入框弱引用（避免耗时遍历庞大的 View 树导致卡死）
         private var currentActiveEditText: WeakReference<EditText>? = null
@@ -97,7 +90,6 @@ class NyaHook : IXposedHookLoadPackage {
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
                         val textView = param.thisObject as? TextView ?: return
-                        registerConfigReceiver(textView.context)
                         if (textView is EditText) {
                             currentActiveEditText = WeakReference(textView)
                             attachSmartTextWatcher(textView)
@@ -145,32 +137,6 @@ class NyaHook : IXposedHookLoadPackage {
             )
 
         } catch (_: Throwable) {}
-    }
-
-    /**
-     * 注册配置动态更新广播接收器
-     */
-    private fun registerConfigReceiver(context: Context?) {
-        if (context == null || isReceiverRegistered) return
-        val appContext = context.applicationContext ?: context
-        try {
-            val filter = IntentFilter(ConfigManager.ACTION_CONFIG_CHANGED)
-            val receiver = object : BroadcastReceiver() {
-                override fun onReceive(c: Context?, intent: Intent?) {
-                    val json = intent?.getStringExtra(ConfigManager.EXTRA_CONFIG_JSON)
-                    if (!json.isNullOrEmpty()) {
-                        val newConfig = NyaConfig.fromJson(json)
-                        ConfigManager.updateInMemoryConfig(newConfig)
-                    }
-                }
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                appContext.registerReceiver(receiver, filter, Context.RECEIVER_EXPORTED)
-            } else {
-                appContext.registerReceiver(receiver, filter)
-            }
-            isReceiverRegistered = true
-        } catch (_: Exception) {}
     }
 
     /**

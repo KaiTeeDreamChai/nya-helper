@@ -69,13 +69,12 @@ object ConfigManager {
     }
 
     /**
-     * 保存配置并立即广播到所有用户空间与已 Hook 进程
+     * 保存配置（供 LSPosed XSharedPreferences 与无障碍服务读取，纯内存映射，0 系统级暴露）
      */
     @Suppress("DEPRECATION")
     fun saveConfig(context: Context, config: NyaConfig) {
         val json = config.toJson()
 
-        // 1. 保存 SharedPreferences (供 LSPosed XSharedPreferences 读取)
         try {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_WORLD_READABLE)
             prefs.edit().putString(KEY_CONFIG, json).commit()
@@ -83,13 +82,6 @@ object ConfigManager {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             prefs.edit().putString(KEY_CONFIG, json).commit()
         }
-
-        // 2. 发送全局跨进程动态更新广播 (内存级即时同步，不落盘任何标记文件)
-        try {
-            val intent = Intent(ACTION_CONFIG_CHANGED)
-            intent.putExtra(EXTRA_CONFIG_JSON, json)
-            context.sendBroadcast(intent)
-        } catch (_: Exception) {}
 
         cachedConfig = config
         lastFetchTime = System.currentTimeMillis()
