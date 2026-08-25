@@ -123,10 +123,25 @@ class NyaAccessibilityService : AccessibilityService() {
         isEditable: Boolean,
         pkg: String
     ): Boolean {
+        val isTencentChatApp = pkg == "com.tencent.mobileqq" || pkg == "com.tencent.mm" || pkg == "com.tencent.tim"
+
         // ============================================================
-        // 策略 A: 标准 editable 控件用 ACTION_SET_TEXT（QQ 等）
+        // 策略 1 (最高优先级): Android 13+ InputConnection API
+        // 走系统标准输入法内核通道，和搜狗/Gboard键盘完全相同，QQ/微信反作弊系统无法区分
         // ============================================================
-        if (isEditable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val success = injectViaInputConnection(originalText, newText)
+            if (success) {
+                DebugLogger.log("[InputConnection] ✅ 拟人化输入法通道注入成功")
+                return true
+            }
+        }
+
+        // ============================================================
+        // 策略 2: 普通 App 的 ACTION_SET_TEXT 兜底
+        // (对 QQ / 微信坚决不调用 ACTION_SET_TEXT，避免被安全组件判定为无障碍自动化外挂)
+        // ============================================================
+        if (!isTencentChatApp && isEditable) {
             val args = Bundle()
             args.putCharSequence(
                 AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE,
@@ -137,30 +152,24 @@ class NyaAccessibilityService : AccessibilityService() {
                 node.refresh()
                 val actual = node.text?.toString() ?: ""
                 if (actual == newText) {
-                    DebugLogger.log("[策略A] ✅ 验证通过")
+                    DebugLogger.log("[ACTION_SET_TEXT] ✅ 验证通过")
                     return true
                 }
             }
         }
 
         // ============================================================
-        // 策略 B: Android 13+ InputConnection API
-        // 和键盘走完全相同的通道，微信无法屏蔽
+        // 策略 3: 非腾讯应用的剪贴板降级
         // ============================================================
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val success = injectViaInputConnection(originalText, newText)
-            if (success) return true
+        if (!isTencentChatApp) {
+            return tryClipboardPaste(node, originalText, newText)
         }
 
-        // ============================================================
-        // 策略 C: 剪贴板降级
-        // ============================================================
-        val clipResult = tryClipboardPaste(node, originalText, newText)
-        return clipResult
+        return false
     }
 
     /**
-     * 通过 InputConnection 直接操作文本（和键盘完全相同的通道）
+     * 通过 InputConnection 直接操作文本（和官方输入法完全相同的合法通道）
      */
     @Suppress("NewApi")
     private fun injectViaInputConnection(originalText: String, newText: String): Boolean {
@@ -168,23 +177,11 @@ class NyaAccessibilityService : AccessibilityService() {
             val im = nyaInputMethod ?: return false
             val ic = im.currentInputConnection ?: return false
 
-            // 1. 全选：setSelection(0, 文本长度)
+            // 1. 全选旧文本：setSelection(0, 文本长度)
             ic.setSelection(0, originalText.length)
 
-            // 2. commitText 替换选中内容
+            // 2. commitText 像输入法候选词一样原子替换
             ic.commitText(newText, 1, null)
-
-            // 3. 验证结果
-            try {
-                val verify = ic.getSurroundingText(500, 500, 0)
-                if (verify != null) {
-                    val verifiedText = verify.text?.toString() ?: ""
-                    if (verifiedText.contains(newText) || verifiedText == newText) {
-                        return true
-                    }
-                }
-            } catch (_: Exception) {}
-
             return true
         } catch (_: Exception) {
             return false
