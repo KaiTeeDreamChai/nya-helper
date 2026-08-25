@@ -2,11 +2,9 @@ package com.nya.helper.engine
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import com.nya.helper.model.NyaConfig
 import com.nya.helper.provider.NyaConfigProvider
 import de.robv.android.xposed.XSharedPreferences
-import java.io.File
 
 object ConfigManager {
 
@@ -30,6 +28,10 @@ object ConfigManager {
 
     /**
      * 读取配置（支持宿主进程、多用户双开分身与 Hook 跨进程）
+     *
+     * ⚠️ 绝对禁止在宿主进程(QQ/微信)中调用 ContentProvider / ContentResolver，
+     *    否则会触发系统级 "Failed to find provider info for com.nya.helper.provider" 错误日志，
+     *    直接向 QQ 安全组件暴露本模块的存在并导致 w21 踢下线。
      */
     fun getConfig(context: Context? = null): NyaConfig {
         val now = System.currentTimeMillis()
@@ -45,9 +47,8 @@ object ConfigManager {
             return config
         }
 
-        // 2. 如果在 Hook 宿主进程中（QQ / 微信 等）
-        // 绝对不在宿主进程内执行任何外置文件/目录探测，彻底杜绝宿主沙盒探测与 SELinux 警报
-        // 渠道 A: 优先使用 LSPosed 内存级 XSharedPreferences (由 LSPosed 守护进程管理)
+        // 2. 宿主进程（QQ / 微信等）：仅使用 LSPosed XSharedPreferences（纯内存映射，0 系统调用）
+        //    绝对不调用 ContentResolver / ContentProvider，避免暴露 com.nya.helper.provider
         try {
             if (xSharedPrefs == null) {
                 xSharedPrefs = XSharedPreferences("com.nya.helper", PREFS_NAME)
@@ -63,25 +64,7 @@ object ConfigManager {
             }
         } catch (_: Throwable) {}
 
-        // 渠道 B: 跨进程 ContentProvider 安全调用
-        if (context != null) {
-            try {
-                val bundle = context.contentResolver.call(
-                    Uri.parse("content://com.nya.helper.provider"),
-                    "getConfig",
-                    null,
-                    null
-                )
-                val json = bundle?.getString("config")
-                if (!json.isNullOrEmpty()) {
-                    val config = NyaConfig.fromJson(json)
-                    cachedConfig = config
-                    lastFetchTime = now
-                    return config
-                }
-            } catch (_: Throwable) {}
-        }
-
+        // 3. 兜底：返回内存缓存或默认配置（由 BroadcastReceiver 实时更新）
         return cachedConfig ?: NyaConfig()
     }
 
@@ -92,7 +75,7 @@ object ConfigManager {
     fun saveConfig(context: Context, config: NyaConfig) {
         val json = config.toJson()
 
-        // 1. 保存 SharedPreferences (供 LSPosed XSharedPreferences 与 ContentProvider 读取)
+        // 1. 保存 SharedPreferences (供 LSPosed XSharedPreferences 读取)
         try {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_WORLD_READABLE)
             prefs.edit().putString(KEY_CONFIG, json).commit()
@@ -112,3 +95,4 @@ object ConfigManager {
         lastFetchTime = System.currentTimeMillis()
     }
 }
+
