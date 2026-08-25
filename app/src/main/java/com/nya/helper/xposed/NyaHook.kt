@@ -14,14 +14,18 @@ import de.robv.android.xposed.XC_MethodHook
 import de.robv.android.xposed.XposedHelpers
 import de.robv.android.xposed.callbacks.XC_LoadPackage
 import java.lang.ref.WeakReference
+import java.util.Collections
+import java.util.WeakHashMap
 
 class NyaHook : IXposedHookLoadPackage {
 
     companion object {
-        private const val WATCHER_ATTACHED_KEY = 0x7f099999
         private var isModifying = false
         private var lastTransformedText = ""
         private var lastTransformTime = 0L
+
+        // 纯内存弱引用记录已挂载 TextWatcher 的输入框（100% 避免 View.setTag 导致的 mKeyedTags 污染）
+        private val attachedWatchers = Collections.synchronizedSet(Collections.newSetFromMap(WeakHashMap<EditText, Boolean>()))
 
         // 当前活跃的输入框弱引用（避免耗时遍历庞大的 View 树导致卡死）
         private var currentActiveEditText: WeakReference<EditText>? = null
@@ -83,17 +87,15 @@ class NyaHook : IXposedHookLoadPackage {
      */
     private fun hookChatApp(lpparam: XC_LoadPackage.LoadPackageParam) {
         try {
-            // Hook 1: 当 EditText 进入主界面时，自动挂载智能 TextWatcher 并记录当前活跃输入框
+            // Hook 1: 精准限定于 EditText.onAttachedToWindow，坚决不污染普通 TextView (气泡、标签、标题等)
             XposedHelpers.findAndHookMethod(
-                TextView::class.java,
+                EditText::class.java,
                 "onAttachedToWindow",
                 object : XC_MethodHook() {
                     override fun afterHookedMethod(param: MethodHookParam) {
-                        val textView = param.thisObject as? TextView ?: return
-                        if (textView is EditText) {
-                            currentActiveEditText = WeakReference(textView)
-                            attachSmartTextWatcher(textView)
-                        }
+                        val editText = param.thisObject as? EditText ?: return
+                        currentActiveEditText = WeakReference(editText)
+                        attachSmartTextWatcher(editText)
                     }
                 }
             )
@@ -159,11 +161,11 @@ class NyaHook : IXposedHookLoadPackage {
     }
 
     /**
-     * 智能挂载 TextWatcher
+     * 智能挂载 TextWatcher（纯内存 WeakHashMap 判重，零 View 结构改动）
      */
     private fun attachSmartTextWatcher(editText: EditText) {
-        if (editText.getTag(WATCHER_ATTACHED_KEY) == true) return
-        editText.setTag(WATCHER_ATTACHED_KEY, true)
+        if (attachedWatchers.contains(editText)) return
+        attachedWatchers.add(editText)
 
         var isDeleting = false
 

@@ -48,13 +48,6 @@
                 android:resource="@xml/accessibility_service_config" />
         </service>
 
-        <!-- ContentProvider for cross-process configuration sharing to Xposed Hook -->
-        <provider
-            android:name=".provider.NyaConfigProvider"
-            android:authorities="com.nya.helper.provider"
-            android:exported="true"
-            android:multiprocess="false" />
-
     </application>
 
 </manifest>
